@@ -144,110 +144,60 @@ Time: 1 + 1 + 1 + 1 + 1 = 5 seconds
 
 ### Algorithm Flow Diagram
 
-```
-START
-  |
-  v
-INPUT: points = [[1,1],[3,4],[-1,0]]
-  |
-  v
-Initialize: totalTime = 0
-  |
-  v
-Loop Start: i = 1, 2, 3, ...
-  |
-  ├─→ i=1? (1 < 3) YES
-  |   └─→ Get Point[0]=(1,1) and Point[1]=(3,4)
-  |   └─→ dx = |3-1| = 2
-  |   └─→ dy = |4-1| = 3
-  |   └─→ time = max(2,3) = 3
-  |   └─→ totalTime = 0 + 3 = 3
-  |   └─→ Continue loop
-  |
-  ├─→ i=2? (2 < 3) YES
-  |   └─→ Get Point[1]=(3,4) and Point[2]=(-1,0)
-  |   └─→ dx = |-1-3| = 4
-  |   └─→ dy = |0-4| = 4
-  |   └─→ time = max(4,4) = 4
-  |   └─→ totalTime = 3 + 4 = 7
-  |   └─→ Continue loop
-  |
-  └─→ i=3? (3 < 3) NO
-      └─→ Exit Loop
-  |
-  v
-RETURN: totalTime = 7
-  |
-  v
-END
-```
-
-### Distance Calculation Visualization
- 
-
-Example 1:
-
-
-Input: points = [[1,1],[3,4],[-1,0]]
-Output: 7
-Explanation: One optimal path is [1,1] -> [2,2] -> [3,3] -> [3,4] -> [2,3] -> [1,2] -> [0,1] -> [-1,0]   
-Time from [1,1] to [3,4] = 3 seconds 
-Time from [3,4] to [-1,0] = 4 seconds
-Total time = 7 seconds
-Example 2:
-
-Input: points = [[3,2],[-2,2]]
-Output: 5
- 
-
-Constraints:
-
-points.length == n
-1 <= n <= 100
-points[i].length == 2
--1000 <= points[i][0], points[i][1] <= 1000
-
-
-
-
-### Algorithm Flow Diagram
+For `points = [[1,1],[3,4],[-1,0]]`:
 
 ```
-START
-  |
-  v
-INPUT: points = [[1,1],[3,4],[-1,0]]
-  |
-  v
-Initialize: totalTime = 0
-  |
-  v
-Loop Start: i = 1, 2, 3, ...
-  |
-  ├─→ i=1? (1 < 3) YES
-  |   └─→ Get Point[0]=(1,1) and Point[1]=(3,4)
-  |   └─→ dx = |3-1| = 2
-  |   └─→ dy = |4-1| = 3
-  |   └─→ time = max(2,3) = 3
-  |   └─→ totalTime = 0 + 3 = 3
-  |   └─→ Continue loop
-  |
-  ├─→ i=2? (2 < 3) YES
-  |   └─→ Get Point[1]=(3,4) and Point[2]=(-1,0)
-  |   └─→ dx = |-1-3| = 4
-  |   └─→ dy = |0-4| = 4
-  |   └─→ time = max(4,4) = 4
-  |   └─→ totalTime = 3 + 4 = 7
-  |   └─→ Continue loop
-  |
-  └─→ i=3? (3 < 3) NO
-      └─→ Exit Loop
-  |
-  v
-RETURN: totalTime = 7
-  |
-  v
-END
+         ┌─────────────────────┐
+         │       START         │
+         └────────────┬────────┘
+                      │
+                      v
+         ┌─────────────────────┐
+         │  totalTime = 0      │
+         └────────────┬────────┘
+                      │
+                      v
+         ┌─────────────────────────────┐
+         │ Loop: i = 1 to len(points)  │
+         └────────────┬────────────────┘
+                      │
+          ┌───────────┴──────────┐
+          │                      │
+          v                      v
+    ┌───────────────┐      ┌────────────────┐
+    │ i < 3? YES    │      │ i < 3? NO      │
+    └────────┬──────┘      └────────┬───────┘
+             │                      │
+    ┌────────v──────────┐           │
+    │ i = 1             │           │
+    │ Get P1=(1,1)      │           │
+    │ Get P2=(3,4)      │           │
+    │ dx = 2, dy = 3    │           │
+    │ time = max(2,3)=3 │           │
+    │ totalTime = 3     │           │
+    │ Loop Again        │           │
+    └────────┬──────────┘           │
+             │                      │
+    ┌────────v──────────┐           │
+    │ i = 2             │           │
+    │ Get P2=(3,4)      │           │
+    │ Get P3=(-1,0)     │           │
+    │ dx = 4, dy = 4    │           │
+    │ time = max(4,4)=4 │           │
+    │ totalTime = 7     │           │
+    │ Loop Again        │           │
+    └────────┬──────────┘           │
+             │                      │
+    ┌────────v──────────┐           │
+    │ i = 3             │           │
+    │ i < 3? NO         │───────────┘
+    │ EXIT LOOP         │
+    └────────┬──────────┘
+             │
+             v
+    ┌────────────────────┐
+    │ RETURN totalTime=7 │
+    └────────────────────┘
 ```
 
 ---
@@ -553,6 +503,125 @@ Total: 7 seconds ✓
 ```
 
 **Output:** 7 ✓
+
+---
+
+## 🔵 Go Implementation
+
+```go
+package main
+
+import "math"
+
+func minTimeToVisitAllPoints(points [][]int) int {
+	// Initialize total time counter to track cumulative seconds
+	totalTime := 0
+
+	// Loop through each point starting from index 1 (the second point)
+	// We start from 1 because we need a previous point to calculate distance from
+	for i := 1; i < len(points); i++ {
+		// Extract coordinates of the previous point (where we're coming from)
+		x1 := points[i-1][0]  // x-coordinate of previous point
+		y1 := points[i-1][1]  // y-coordinate of previous point
+
+		// Extract coordinates of the current point (where we're going to)
+		x2 := points[i][0]  // x-coordinate of current point
+		y2 := points[i][1]  // y-coordinate of current point
+
+		// Calculate the absolute horizontal distance between the two points
+		// abs() ensures the distance is always positive regardless of direction
+		dx := int(math.Abs(float64(x2 - x1)))
+
+		// Calculate the absolute vertical distance between the two points
+		// abs() ensures the distance is always positive regardless of direction
+		dy := int(math.Abs(float64(y2 - y1)))
+
+		// Calculate time for this segment using Chebyshev distance
+		// Time = max(dx, dy) because we can move diagonally
+		// - Move diagonally for min(dx, dy) steps (covers both directions)
+		// - Then move in remaining direction for |dx - dy| steps
+		// - Total = min(dx, dy) + |dx - dy| = max(dx, dy)
+		segmentTime := int(math.Max(float64(dx), float64(dy)))
+
+		// Add this segment's time to the total
+		totalTime += segmentTime
+	}
+
+	// Return the total accumulated time to visit all points in order
+	return totalTime
+}
+
+// Helper function to find maximum of two integers
+// Go doesn't have a built-in max function, so we implement it
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+// Helper function to find absolute value of an integer
+// Go doesn't have a built-in abs function for integers, so we implement it
+func abs(a int) int {
+	if a < 0 {
+		return -a
+	}
+	return a
+}
+
+// Alternative optimized version using helper functions (avoids type conversion)
+func minTimeToVisitAllPointsOptimized(points [][]int) int {
+	totalTime := 0
+
+	for i := 1; i < len(points); i++ {
+		x1, y1 := points[i-1][0], points[i-1][1]
+		x2, y2 := points[i][0], points[i][1]
+
+		dx := abs(x2 - x1)
+		dy := abs(y2 - y1)
+
+		// Use helper max function
+		totalTime += max(dx, dy)
+	}
+
+	return totalTime
+}
+```
+
+### Go Code Explanation:
+
+**Main Function Breakdown:**
+- **`len(points)`**: Gets the number of points in the slice
+- **`points[i-1][0]`**: Accesses x-coordinate of point at index i-1
+- **`math.Abs()`**: Calculates absolute value (requires type conversion to float64)
+- **`int(math.Max(...))`**: Finds maximum and converts result back to int
+- **Loop starts at 1**: We need a previous point for distance calculation
+
+**Type Conversions:**
+- Go requires explicit type conversion: `float64(value)` and `int(result)`
+- This is more verbose than other languages but ensures type safety
+
+**Alternative Optimized Version:**
+- Uses custom `abs()` and `max()` helper functions
+- Avoids repeated `math` package calls
+- Cleaner, more efficient code (avoids type conversions)
+- **Recommended for production** use
+
+### Comparison: `math.Abs()` vs Custom `abs()`
+
+```go
+// Option 1: Using math.Abs() (requires type conversion)
+dx := int(math.Abs(float64(x2 - x1)))  // More conversions
+dy := int(math.Abs(float64(y2 - y1)))
+distance := int(math.Max(float64(dx), float64(dy)))
+
+// Option 2: Using custom helpers (cleaner)
+dx := abs(x2 - x1)      // Direct calculation
+dy := abs(y2 - y1)
+distance := max(dx, dy)
+
+// Option 2 is preferred for Go development!
+```
 
 ---
 
